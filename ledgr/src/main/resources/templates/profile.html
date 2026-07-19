@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile — Ledgr</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="app-shell">
+
+    <div th:replace="~{fragments/sidebar :: sidebar('profile')}"></div>
+
+    <div class="main-area">
+
+        <div class="page-head">
+            <div>
+                <h1>Profile</h1>
+                <p>manage your account details.</p>
+            </div>
+        </div>
+
+        <div class="grid-2">
+
+            <div class="panel">
+                <h2>Your name</h2>
+                <p th:if="${nameSaved}" style="color:var(--green-dark);font-size:0.85rem;">Saved.</p>
+
+                <form th:action="@{/profile/name}" th:object="${nameForm}" method="post" novalidate>
+                    <div class="field-group">
+                        <label>Full name</label>
+                        <input type="text" th:field="*{name}">
+                        <div class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                    </div>
+                    <button type="submit" class="btn-ledgr btn-green">Save name</button>
+                </form>
+
+                <hr style="border:none;border-top:1px solid var(--line);margin:24px 0;">
+
+                <div class="field-group" style="margin-bottom:0;">
+                    <label>Email</label>
+                    <input type="text" th:value="${user.email}" disabled style="background:var(--bg);color:var(--ink-soft);">
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Change password</h2>
+                <p th:if="${passwordSaved}" style="color:var(--green-dark);font-size:0.85rem;">Password updated.</p>
+
+                <form th:action="@{/profile/password}" th:object="${passwordForm}" method="post" novalidate>
+                    <div class="field-group">
+                        <label>Current password</label>
+                        <input type="password" th:field="*{currentPassword}">
+                        <div class="field-error" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></div>
+                    </div>
+                    <div class="field-group">
+                        <label>New password</label>
+                        <input type="password" th:field="*{newPassword}">
+                        <div class="field-error" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></div>
+                    </div>
+                    <div class="field-group">
+                        <label>Confirm new password</label>
+                        <input type="password" th:field="*{confirmNewPassword}">
+                        <div class="field-error" th:if="${#fields.hasErrors('confirmNewPassword')}" th:errors="*{confirmNewPassword}"></div>
+                    </div>
+                    <button type="submit" class="btn-ledgr btn-green">Update password</button>
+                </form>
+            </div>
+
+        </div>
+
+        <div class="panel" style="border-color:#f3c9c6;">
+            <h2 style="color:var(--red);">Delete account</h2>
+            <p style="color:var(--ink-soft);font-size:0.9rem;margin-top:-8px;">
+                This deletes your account and every transaction and budget tied to it. There's no undo.
+            </p>
+
+            <form th:action="@{/profile/delete}" th:object="${deleteForm}" method="post" novalidate
+                  onsubmit="return confirm('This permanently deletes your account. Are you sure?')"
+                  style="max-width:340px;">
+                <div class="field-group">
+                    <label>Confirm your password</label>
+                    <input type="password" th:field="*{password}">
+                    <div class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                </div>
+                <button type="submit" class="btn-ledgr" style="background:var(--red);color:#fff;">Delete my account</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

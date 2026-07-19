@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactions — Ledgr</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="app-shell">
+
+    <div th:replace="~{fragments/sidebar :: sidebar('transactions')}"></div>
+
+    <div class="main-area">
+
+        <div class="page-head">
+            <div>
+                <h1>Transactions</h1>
+                <p>every rupee, logged.</p>
+            </div>
+        </div>
+
+        <div class="panel add-tx-panel">
+            <h2>Add a transaction</h2>
+            <form th:action="@{/transactions}" th:object="${txForm}" method="post" novalidate>
+                <div class="tx-form-grid">
+                    <div class="field-group">
+                        <label>Amount</label>
+                        <input type="number" step="0.01" th:field="*{amount}" placeholder="0.00">
+                        <div class="field-error" th:if="${showAddErrors != null and showAddErrors and #fields.hasErrors('amount')}" th:errors="*{amount}"></div>
+                    </div>
+                    <div class="field-group">
+                        <label>Type</label>
+                        <select th:field="*{type}">
+                            <option th:each="t : ${types}" th:value="${t}" th:text="${t}"></option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Category</label>
+                        <select th:field="*{category}">
+                            <option th:each="c : ${categories}" th:value="${c}" th:text="${c}"></option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Date</label>
+                        <input type="date" th:field="*{date}">
+                    </div>
+                    <div class="field-group">
+                        <label>Description</label>
+                        <input type="text" th:field="*{description}" placeholder="what was it for">
+                    </div>
+                    <button type="submit" class="btn-ledgr btn-green">Add</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <div class="toolbar-row">
+                <h2 style="margin:0;">All transactions</h2>
+                <form th:action="@{/transactions}" method="get" class="filter-bar">
+                    <input type="text" name="q" placeholder="Search description" th:value="${q}">
+                    <select name="type" onchange="this.form.submit()">
+                        <option value="">All types</option>
+                        <option th:each="t : ${types}" th:value="${t}" th:text="${t}" th:selected="${t.name() == selectedType}"></option>
+                    </select>
+                    <select name="category" onchange="this.form.submit()">
+                        <option value="">All categories</option>
+                        <option th:each="c : ${categories}" th:value="${c}" th:text="${c}" th:selected="${c.name() == selectedCategory}"></option>
+                    </select>
+                    <button type="submit" class="btn-ledgr btn-outline">Filter</button>
+                </form>
+            </div>
+
+            <div th:if="${#lists.isEmpty(txList)}" class="empty-state">
+                Nothing here yet. Add your first transaction above.
+            </div>
+
+            <table class="tx-table" th:unless="${#lists.isEmpty(txList)}">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="tx : ${txList}">
+                    <td th:text="${#temporals.format(tx.date, 'dd MMM yyyy')}"></td>
+                    <td th:text="${tx.description != null and !tx.description.isEmpty() ? tx.description : '—'}"></td>
+                    <td th:text="${tx.category}"></td>
+                    <td>
+                        <span class="badge" th:classappend="${tx.type.name() == 'INCOME' ? 'badge-income' : 'badge-expense'}" th:text="${tx.type}"></span>
+                    </td>
+                    <td th:text="${(tx.type.name() == 'EXPENSE' ? '-' : '+')} + '₹' + ${#numbers.formatDecimal(tx.amount, 1, 'COMMA', 2, 'POINT')}"
+                        th:classappend="${tx.type.name() == 'EXPENSE' ? 'val negative' : 'val positive'}"></td>
+                    <td>
+                        <div class="row-actions">
+                            <a class="icon-link" th:href="@{/transactions/{id}/edit(id=${tx.id})}">Edit</a>
+                            <form th:action="@{/transactions/{id}/delete(id=${tx.id})}" method="post" onsubmit="return confirm('delete this transaction?')">
+                                <button type="submit" class="icon-link danger" style="background:none;border:none;padding:0;cursor:pointer;font-family:inherit;">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
