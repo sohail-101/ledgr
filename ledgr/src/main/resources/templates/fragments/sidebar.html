@@ -1,0 +1,23 @@
+<div th:fragment="sidebar(active)" class="sidebar">
+    <div class="brand"><span class="brand-dot"></span>ledgr</div>
+
+    <a th:href="@{/dashboard}" class="side-link" th:classappend="${active == 'dashboard' ? 'active' : ''}">
+        Dashboard
+    </a>
+    <a th:href="@{/transactions}" class="side-link" th:classappend="${active == 'transactions' ? 'active' : ''}">
+        Transactions
+    </a>
+    <a th:href="@{/budgets}" class="side-link" th:classappend="${active == 'budgets' ? 'active' : ''}">
+        Budgets
+    </a>
+    <a th:href="@{/analytics}" class="side-link" th:classappend="${active == 'analytics' ? 'active' : ''}">
+        Analytics
+    </a>
+    <a th:href="@{/profile}" class="side-link" th:classappend="${active == 'profile' ? 'active' : ''}">
+        Profile
+    </a>
+
+    <div class="sidebar-bottom">
+        <a th:href="@{/logout}" class="side-link">Log out</a>
+    </div>
+</div>
