@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Ledgr</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+
+    <div th:replace="~{fragments/sidebar :: sidebar('dashboard')}"></div>
+
+    <div class="main-area">
+
+        <div class="page-head">
+            <div>
+                <h1 th:text="'Hey ' + ${user.name} + ','"></h1>
+                <p>-------</p>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="lbl">Total balance</div>
+                <div class="val" th:text="'₹' + ${#numbers.formatDecimal(totalBalance, 1, 'COMMA', 2, 'POINT')}"></div>
+            </div>
+            <div class="summary-card">
+                <div class="lbl">Total income</div>
+                <div class="val positive" th:text="'₹' + ${#numbers.formatDecimal(totalIncome, 1, 'COMMA', 2, 'POINT')}"></div>
+            </div>
+            <div class="summary-card">
+                <div class="lbl">Total expenses</div>
+                <div class="val negative" th:text="'₹' + ${#numbers.formatDecimal(totalExpense, 1, 'COMMA', 2, 'POINT')}"></div>
+            </div>
+            <div class="summary-card">
+                <div class="lbl">This month's savings</div>
+                <div class="val" th:text="'₹' + ${#numbers.formatDecimal(monthlySavings, 1, 'COMMA', 2, 'POINT')}"></div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="panel">
+                <h2>Spending by category</h2>
+                <canvas id="categoryPie" height="220"></canvas>
+            </div>
+            <div class="panel">
+                <h2>Budget progress</h2>
+                <p style="font-size:0.88rem;color:var(--ink-soft);margin-top:-8px;">
+                    <span th:if="${budgetAmount.compareTo(T(java.math.BigDecimal).ZERO) == 0}">
+                        No budget set for this month yet.
+                        <a th:href="@{/budgets}" style="color:var(--green-dark);font-weight:600;">Set one</a>
+                    </span>
+                    <span th:unless="${budgetAmount.compareTo(T(java.math.BigDecimal).ZERO) == 0}">
+                        ₹<span th:text="${#numbers.formatDecimal(spentThisMonth, 1, 'COMMA', 2, 'POINT')}"></span>
+                        of ₹<span th:text="${#numbers.formatDecimal(budgetAmount, 1, 'COMMA', 2, 'POINT')}"></span> spent
+                    </span>
+                </p>
+                <div class="progress-track">
+                    <div class="progress-fill" th:classappend="${pctSpent >= 100 ? 'over' : ''}" th:style="'width:' + ${pctSpent} + '%'"></div>
+                </div>
+                <div class="progress-labels">
+                    <span th:text="${pctSpent} + '% used'"></span>
+                    <span>100%</span>
+                </div>
+
+                <h2 style="margin-top:26px;">Monthly trend</h2>
+                <canvas id="trendLine" height="140"></canvas>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Recent transactions</h2>
+
+            <div th:if="${#lists.isEmpty(recentTx)}" class="empty-state">
+                No transactions yet. <a th:href="@{/transactions}">Add your first one</a> to see it here.
+            </div>
+
+            <table class="tx-table" th:unless="${#lists.isEmpty(recentTx)}">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="tx : ${recentTx}">
+                    <td th:text="${#temporals.format(tx.date, 'dd MMM yyyy')}"></td>
+                    <td th:text="${tx.description}"></td>
+                    <td th:text="${tx.category}"></td>
+                    <td th:text="${(tx.type.name() == 'EXPENSE' ? '-' : '+')} + '₹' + ${#numbers.formatDecimal(tx.amount, 1, 'COMMA', 2, 'POINT')}"
+                        th:classappend="${tx.type.name() == 'EXPENSE' ? 'val negative' : 'val positive'}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const pieCtx = document.getElementById('categoryPie');
+    new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['No data yet'],
+            datasets: [{
+                data: [1],
+                backgroundColor: ['#e6e8e6'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            plugins: { legend: { position: 'bottom' } },
+            cutout: '65%'
+        }
+    });
+
+    const lineCtx = document.getElementById('trendLine');
+    new Chart(lineCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+            datasets: [{
+                label: 'Expenses',
+                data: [0,0,0,0,0,0],
+                borderColor: '#0f9d63',
+                backgroundColor: 'rgba(15,157,99,0.08)',
+                fill: true,
+                tension: 0.35
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+</script>
+
+</body>
+</html>

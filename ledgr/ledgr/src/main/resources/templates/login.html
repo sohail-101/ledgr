@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in — Ledgr</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="auth-shell">
+    <div class="auth-card">
+        <h1>Welcome back</h1>
+        <p class="auth-sub">Log in to see where your money's been going.</p>
+
+        <div class="form-alert" th:if="${loginError}" th:text="${loginError}"></div>
+
+        <form th:action="@{/login}" th:object="${loginForm}" method="post" novalidate>
+
+            <div class="field-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" th:field="*{email}" placeholder="you@example.com" autocomplete="email">
+            </div>
+
+            <div class="field-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" th:field="*{password}" placeholder="Your password" autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn-ledgr btn-green btn-block-ledgr">Log in</button>
+        </form>
+
+        <p class="auth-switch">New to Ledgr? <a th:href="@{/register}">Create an account</a></p>
+    </div>
+</div>
+
+</body>
+</html>
