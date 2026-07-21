@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budgets — Ledgr</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="app-shell">
+
+    <div th:replace="~{fragments/sidebar :: sidebar('budgets')}"></div>
+
+    <div class="main-area">
+
+        <div class="page-head">
+            <div>
+                <h1>Budgets</h1>
+                <p>give each month a ceiling and stick to it.</p>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="panel">
+                <h2>Set a budget</h2>
+                <form th:action="@{/budgets}" th:object="${budgetForm}" method="post" novalidate>
+
+                    <div class="field-group">
+                        <label>Month</label>
+                        <select th:field="*{month}">
+                            <option th:each="i : ${#numbers.sequence(1, 12)}"
+                                    th:value="${i}"
+                                    th:text="${monthNames.get(i - 1)}"></option>
+                        </select>
+                        <div class="field-error" th:if="${#fields.hasErrors('month')}" th:errors="*{month}"></div>
+                    </div>
+
+                    <div class="field-group">
+                        <label>Year</label>
+                        <input type="number" th:field="*{year}">
+                        <div class="field-error" th:if="${#fields.hasErrors('year')}" th:errors="*{year}"></div>
+                    </div>
+
+                    <div class="field-group">
+                        <label>Budget amount</label>
+                        <input type="number" step="0.01" th:field="*{amount}" placeholder="0.00">
+                        <div class="field-error" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></div>
+                    </div>
+
+                    <button type="submit" class="btn-ledgr btn-green btn-block-ledgr">Save budget</button>
+                    <p style="font-size:0.8rem;color:var(--ink-soft);margin-top:10px;">
+                        If a budget already exists for that month, this just updates it.
+                    </p>
+                </form>
+            </div>
+
+            <div class="panel">
+                <h2 th:text="${monthNames.get(currentMonth - 1)} + ' ' + ${currentYear}"></h2>
+
+                <div th:if="${#lists.isEmpty(history)}" class="empty-state">
+                    No budget set yet. Use the form to add one.
+                </div>
+
+                <th:block th:each="row : ${history}" th:if="${row.budget.month == currentMonth and row.budget.year == currentYear}">
+                    <p style="font-size:0.88rem;color:var(--ink-soft);">
+                        ₹<span th:text="${#numbers.formatDecimal(row.spent, 1, 'COMMA', 2, 'POINT')}"></span>
+                        of ₹<span th:text="${#numbers.formatDecimal(row.budget.amount, 1, 'COMMA', 2, 'POINT')}"></span> spent
+                    </p>
+                    <div class="progress-track">
+                        <div class="progress-fill" th:classappend="${row.pctSpent >= 100 ? 'over' : ''}" th:style="'width:' + ${row.pctSpent > 100 ? 100 : row.pctSpent} + '%'"></div>
+                    </div>
+                    <div class="progress-labels">
+                        <span th:text="${row.pctSpent} + '% used'"></span>
+                        <span th:text="'₹' + ${#numbers.formatDecimal(row.remaining, 1, 'COMMA', 2, 'POINT')} + ' left'"></span>
+                    </div>
+                </th:block>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>History</h2>
+
+            <div th:if="${#lists.isEmpty(history)}" class="empty-state">
+                Nothing to show yet.
+            </div>
+
+            <table class="tx-table" th:unless="${#lists.isEmpty(history)}">
+                <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Budget</th>
+                    <th>Spent</th>
+                    <th>Remaining</th>
+                    <th>Used</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="row : ${history}">
+                    <td th:text="${monthNames.get(row.budget.month - 1)} + ' ' + ${row.budget.year}"></td>
+                    <td th:text="'₹' + ${#numbers.formatDecimal(row.budget.amount, 1, 'COMMA', 2, 'POINT')}"></td>
+                    <td th:text="'₹' + ${#numbers.formatDecimal(row.spent, 1, 'COMMA', 2, 'POINT')}"></td>
+                    <td th:text="'₹' + ${#numbers.formatDecimal(row.remaining, 1, 'COMMA', 2, 'POINT')}"
+                        th:classappend="${row.remaining.signum() < 0 ? 'val negative' : 'val positive'}"></td>
+                    <td th:text="${row.pctSpent} + '%'"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
