@@ -1,7 +1,8 @@
 # Ledgr
 
-##Video Demo: https://youtu.be/xsaEwwCUlGc
-##Description: 
+## Video Demo: https://youtu.be/xsaEwwCUlGc
+
+## Description: 
 A personal finance tracker I built because I was tired of opening a spreadsheet, forgetting to update it for two weeks, and then having no idea where my money went. Ledgr is the "just log it and see it on a dashboard" version of that spreadsheet — log income and expenses, set a monthly budget, and actually see where things stand instead of guessing.
 
 Started as my CS50 final project, ended up being a proper full-stack build.
